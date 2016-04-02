@@ -12,13 +12,13 @@ host = raw_input('Enter an IP to connect to : ')
 port = 8888;
  
 while(1) :
-    msg = raw_input('Enter message to send : ')
+    #msg = raw_input('Enter message to send : ')
      
     try :
         #Set the whole string
         #s.sendto(msg, (host, port))
 
-        with open("./test.txt", "rb") as fi:
+        with open("test.txt", "rb") as fi:
             buf = fi.read(32)
             while (buf):
                s.sendto(buf, (host, port))
