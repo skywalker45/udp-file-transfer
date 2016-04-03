@@ -10,27 +10,55 @@ except socket.error:
  
 host = raw_input('Enter an IP to connect to : ')
 port = 8888;
- 
-while(1) :
-    #msg = raw_input('Enter message to send : ')
-     
-    try :
-        #Set the whole string
-        #s.sendto(msg, (host, port))
 
-        with open("test.txt", "rb") as fi:
-            buf = fi.read(32)
-            while (buf):
-               s.sendto(buf, (host, port))
-               buf = fi.read(32)
-         
-        # receive data from server (data, addr)
-        d = s.recvfrom(1024)
-        reply = d[0]
-        addr = d[1]
-         
-        print 'Server() reply : ' + reply
+fileaccepted = True                             #we assume the filename is accepted unless told otherwise by the server
+s.sendto(":FILENAME:", (host, port))            #indicate that filename will be coming next to server
+filename = raw_input('Enter name of File: ')
+s.sendto(filename, (host, port))                #send proposed filename to server
+
+d = s.recvfrom(1024)
+reply = d[0]
+addr = d[1]
+
+if reply == "ERROR: EXISTING FILENAME":
+    fileaccepted == False
+
+while not fileaccepted:
+    filename = raw_input('That file name already exists!\nPlease provide another filename: ')
+    s.sendto(filename, (host, port))                #send proposed filename to server
+
+    s.sendto(filename, (host, port))
+    d = s.recvfrom(1024)
+    reply = d[0]
+    addr = d[1]
+
+    if reply != "ERROR: EXISTING FILENAME":
+        fileaccepted == True
+
+
+'''
+try :
+    #http://stackoverflow.com/questions/25465792/python-binary-eof the first answer.
+    #all the other SO answers are WRONG!!!!
+    with open("newtest.txt", "rb") as infile:
+        while True:
+            data = infile.read(32)
+
+            if not data:
+                break
+
+            s.sendto(data, (host, port))
+            
+            # receive data from server (data, addr)
+            d = s.recvfrom(1024)
+            reply = d[0]
+            addr = d[1]
      
-    except socket.error, msg:
-        print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-        sys.exit()
+            print 'Server(' + str(addr) + ') reply : ' + reply
+
+    break
+ 
+except socket.error, msg:
+    print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+    sys.exit()
+'''
