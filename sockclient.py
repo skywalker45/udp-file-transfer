@@ -27,7 +27,6 @@ while not fileaccepted:
     filename = raw_input('That file name already exists!\nPlease provide another filename: ')
     s.sendto(filename, (host, port))                #send proposed filename to server
 
-    s.sendto(filename, (host, port))
     d = s.recvfrom(1024)
     reply = d[0]
     addr = d[1]
@@ -35,12 +34,10 @@ while not fileaccepted:
     if reply != "ERROR: EXISTING FILENAME":
         fileaccepted == True
 
-
 '''
 try :
-    #http://stackoverflow.com/questions/25465792/python-binary-eof the first answer.
-    #all the other SO answers are WRONG!!!!
-    with open("newtest.txt", "rb") as infile:
+    #http://stackoverflow.com/questions/25465792/python-binary-eof
+    with open(filename, "rb") as infile:
         while True:
             data = infile.read(32)
 
@@ -50,15 +47,18 @@ try :
             s.sendto(data, (host, port))
             
             # receive data from server (data, addr)
-            d = s.recvfrom(1024)
-            reply = d[0]
-            addr = d[1]
-     
-            print 'Server(' + str(addr) + ') reply : ' + reply
+            receive()
+            
+            print 'Server' + str(addr) + ' reply : ' + reply
 
-    break
+    s.sendto(":END:", (host, port))
  
 except socket.error, msg:
     print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
     sys.exit()
 '''
+
+
+
+
+

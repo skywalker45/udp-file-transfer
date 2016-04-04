@@ -26,34 +26,44 @@ print 'Socket bind complete'
  
 #now keep talking with the client
 
-filename = True
+filename = False
+datacoming = False 
 
 while 1:
 
     # receive data from client (data, addr)
-    d = s.recvfrom(32)
+    d = s.recvfrom(1024)
     data = d[0]
     addr = d[1]
-    print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip()
 
     if not data:
         break
-    
-    if data == ":FILENAME:":
-        # The filename is coming in the next packet.
-        # Get ready to receive it.
-        filename = True
 
     if filename:
         # The filename is here.
         # check if the filename exists
         if not os.path.isfile("Uploads/" + data.strip()):
-            # open/create that file and get it ready for writing.
-            open("Uploads/" + data.strip(), "w+")
+            # if it doesn't exist: open/create that file and get it ready for writing.
+            f = open("Uploads/" + data.strip(), "a+")
             filename = False
         else:
             reply = "ERROR: EXISTING FILENAME"
             s.sendto(reply , addr)
+
+    if data == ":FILENAME:":
+        # The filename is coming in the next packet.
+        # Get ready to receive it.
+        filename = True
+    
+    elif data == ":DATA:":
+        datacoming = True
+
+    elif data == ":END:":
+        datacoming = False
+        break
+
+    if datacoming:
+        f.write(data)
      
     print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip()
      
