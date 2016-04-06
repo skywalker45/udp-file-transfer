@@ -1,6 +1,0 @@
-new test
-this is just a few lines
-so we know it is working
-so I'm gonna stop now
-thanks
-yo
