@@ -39,31 +39,7 @@ while 1:
     if not data:
         break
 
-    if filename:
-        # The filename is here.
-        # check if the filename exists
-        if not os.path.isfile("Uploads/" + data.strip()):
-            # if it doesn't exist: open/create that file and get it ready for writing.
-            f = open("Uploads/" + data.strip(), "a+")
-            filename = False
-        else:
-            reply = "ERROR: EXISTING FILENAME"
-            s.sendto(reply , addr)
-
-    if data == ":FILENAME:":
-        # The filename is coming in the next packet.
-        # Get ready to receive it.
-        filename = True
-    
-    elif data == ":DATA:":
-        datacoming = True
-
-    elif data == ":END:":
-        datacoming = False
-        break
-
-    if datacoming:
-        f.write(data)
+    s.sendto(data, addr)
      
     print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip()
      

@@ -1,64 +1,82 @@
 import socket   #for sockets
 import sys  #for exit
- 
+import threading
+import select
+
 # create dgram udp socket
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 except socket.error:
     print 'Failed to create socket'
     sys.exit()
- 
+
 host = raw_input('Enter an IP to connect to : ')
 port = 8888;
 
-fileaccepted = True                             #we assume the filename is accepted unless told otherwise by the server
-s.sendto(":FILENAME:", (host, port))            #indicate that filename will be coming next to server
-filename = raw_input('Enter name of File: ')
-s.sendto(filename, (host, port))                #send proposed filename to server
+filename = ""
 
-d = s.recvfrom(1024)
-reply = d[0]
-addr = d[1]
+packets = []
+tracking = []   # this variable will hold a buffer of all the packets and the time that it has been since they left
+                # when that time expires it will be sent again
 
-if reply == "ERROR: EXISTING FILENAME":
-    fileaccepted == False
+def main():
 
-while not fileaccepted:
-    filename = raw_input('That file name already exists!\nPlease provide another filename: ')
-    s.sendto(filename, (host, port))                #send proposed filename to server
+    filename = raw_input('Enter name of File: ')
 
-    d = s.recvfrom(1024)
-    reply = d[0]
-    addr = d[1]
-
-    if reply != "ERROR: EXISTING FILENAME":
-        fileaccepted == True
-
-'''
-try :
     #http://stackoverflow.com/questions/25465792/python-binary-eof
     with open(filename, "rb") as infile:
         while True:
             data = infile.read(32)
-
             if not data:
                 break
 
-            s.sendto(data, (host, port))
-            
-            # receive data from server (data, addr)
-            receive()
-            
-            print 'Server' + str(addr) + ' reply : ' + reply
+            package(data)
+        print "[BREAK]"
+        listen = False
+        print "listen == False"
 
-    s.sendto(":END:", (host, port))
- 
-except socket.error, msg:
-    print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-    sys.exit()
-'''
+def package(d):
+    print "packaging data: \"" + d + "\""
+    packets.append((filename, d, 256))
+    trackit()
+
+def trackit():
+    print "trackit"
+
+class listen(threading.Thread):
+    
+    def __init__(self):
+        print "Starting listen() thread..."
+        threading.Thread.__init__(self)
+        self.running = 1
+
+    def run(self):
+        while self.running:
+            ready = select.select([s], [], [], 1)
+            if ready[0]:
+                d = s.recvfrom(1024)
+                reply = d[0]
+                addr = d[1]
+
+            print reply
+
+        print "...listen() stopped."
+
+    def stop(self):
+        self.listening = False
+        print "Stopping listen()..."
+
+    def kill(self):
+        self.running = 0
 
 
 
-
-
+if __name__ == '__main__':
+    # listen for response from server
+    print "doing stuff"
+    # t = threading.Thread(target=listen)
+    listener = listen()
+    listener.start()
+    print "running main..."
+    main()
+    listener.stop()
