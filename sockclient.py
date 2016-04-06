@@ -42,7 +42,7 @@ def package(d):
     trackit(index)
 
 def trackit(num):
-    print "tracking packet " + num
+    print "tracking packet " + str(num)
 
 
 class listen(threading.Thread):
@@ -64,13 +64,9 @@ class listen(threading.Thread):
 
         print "...listen() stopped."
 
-    def stop(self):
-        self.listening = False
-        print "Stopping listen()..."
-
     def kill(self):
         self.running = 0
-
+        print "Killing listen()..."
 
 
 if __name__ == '__main__':
@@ -81,4 +77,4 @@ if __name__ == '__main__':
     listener.start()
     print "running main..."
     main()
-    listener.stop()
+    listener.kill()
