@@ -36,12 +36,14 @@ def main():
         print "listen == False"
 
 def package(d):
-    print "packaging data: \"" + d + "\""
-    packets.append((filename, d, 256))
-    trackit()
+    print "packaging data:\n\"\n" + d + "\n\""
+    packets.append((filename, d))
+    index = len(packets)
+    trackit(index)
 
-def trackit():
-    print "trackit"
+def trackit(num):
+    print "tracking packet " + num
+
 
 class listen(threading.Thread):
     
@@ -57,8 +59,8 @@ class listen(threading.Thread):
                 d = s.recvfrom(1024)
                 reply = d[0]
                 addr = d[1]
-
-            print reply
+                
+                print reply
 
         print "...listen() stopped."
 
