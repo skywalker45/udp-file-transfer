@@ -5,7 +5,7 @@ import os
 import ast
  
 HOST = ''   # Symbolic name meaning all available interfaces
-PORT = 8989 # Arbitrary non-privileged port
+PORT = 8888 # Arbitrary non-privileged port
  
 # Datagram (udp) socket
 try :
@@ -24,13 +24,41 @@ except socket.error , msg:
 	sys.exit()
 	 
 print 'Socket bind complete'
- 
-#now keep talking with the client
 
-filename = False
-datacoming = False 
+packets = []
+pktNum = 0
+file = None
+running = 1
 
-while 1:
+def writeFileFromPackets():
+
+	global pktNum
+
+	for x in packets:
+		if x[0] == pktNum and pktNum == 0:
+
+			global file
+			file = open("Uploads/" + str(x[1]), "a+")
+			file.write(str(x[2]))
+			pktNum += 1
+
+		elif x[0] == pktNum:
+			
+			file.write(str(x[2]))
+			pktNum += 1
+
+		elif x[3] < pktNum:
+			global file
+			file.close()
+			global running
+			running = 0
+
+
+def storePacket(pkt):
+	packets.append(pkt)
+	writeFileFromPackets()
+
+while running:
 
 	# receive data from client (data, addr)
 	d = s.recvfrom(1024)
@@ -42,6 +70,7 @@ while 1:
 
 	packet = ast.literal_eval(data)
 	s.sendto(str(packet[0]), addr)
+	storePacket(packet)
 	print packet
 	 
 s.close()

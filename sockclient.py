@@ -3,6 +3,7 @@ import sys  #for exit
 import threading
 import select
 import time
+import multiprocessing
 
 # create dgram udp socket
 try:
@@ -23,7 +24,6 @@ tracking = []   # this variable will keep track of the time that
 				# expires it will be sent again.
 
 def main():
-
 	global filename
 	filename = raw_input('Enter name of File: ')
 
@@ -33,39 +33,46 @@ def main():
 			data = infile.read(32)
 			if not data:
 				break
-
 			package(data)
-		print "[BREAK]"
+		appendSize()
 		sendPackets()
-		startTracking()
+
+def appendSize():
+
+	global packets
+
+	for x in xrange(0,len(packets)):
+		packets[x] = packets[x] + (len(packets),)
+
 
 def package(d):
 	global packetNum
 	packetNum += 1
-
 	packets.append((packetNum,filename, d))
-	index = len(packets)
-	trackit(index)
+	tracking.append(True)
 
-def trackit(num):
-	print "tracking packet " + str(num)
-	tracking.append(256)
 
 def sendPackets():
 	for packet in packets:
 		packet = packet + (len(packets),)       # adding total number of packets to packet.
 												# This could not be calculated in advance
 												# and is guarunteed to be correct if calulated now.
-		s.sendto(str(packet), (host, port))
+		trackit(packet[0])
+		# s.sendto(str(packet), (host, port))
+		
 
-def startTracking():
-	#decrement each array by one and resend the corresponding packet when the count reaches 0
-	print "startTracking"
-	# while 1:
-	#     tracking[:] = [x - 1 for x in tracking]
-	#     print "decrementing: " + str(tracking[0])
-	#     if tracking[0] <= 0:
-	#         break
+def trackit(pktNum):
+	
+	print "sending packet " + str(pktNum)
+	
+	s.sendto(str(packets[pktNum]), (host, port))	
+	time.sleep(0.1)
+	
+	while tracking[pktNum]:
+		for x in xrange(1,10):
+			time.sleep(0.1)
+		print "sending packet " + str(pktNum) + " again..."
+
 
 class listen(threading.Thread):
 	
@@ -76,11 +83,14 @@ class listen(threading.Thread):
 
 	def run(self):
 		while self.running:
+			global tracking
 			ready = select.select([s], [], [], 1)
 			if ready[0]:
 				d = s.recvfrom(1024)
 				reply = d[0]
 				addr = d[1]
+
+				tracking[int(reply)] = False
 
 				print reply
 
