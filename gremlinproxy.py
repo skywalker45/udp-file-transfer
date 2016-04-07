@@ -1,35 +1,61 @@
-import SocketServer
+import socket
+import sys
+import random
 
-class MyUDPHandler(SocketServer.BaseRequestHandler):
+HOST = "localhost"   # Symbolic name meaning all available interfaces
+SERVERPORT = 8888 # Arbitrary non-privileged port
+CLIENTPORT = 9999
+# Datagram (udp) socket
+try :
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    print 'Socket created'
+except socket.error, msg :
+    print 'Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+    sys.exit()
+ 
+ 
+# Bind socket to local host and port
+try:
+    s.bind((HOST, CLIENTPORT))
+    
+except socket.error , msg:
+    print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+    sys.exit()
+     
+print 'Socket bind complete'
+ 
+#now keep talking with the client
+# receive data from client (data, addr)
+d = s.recvfrom(1024)
+data = d[0]
+addr1 = d[1]
+ 
+ 
+reply = 'from proxy: ' + data
+ 
+
+print 'Message[' + addr1[0] + ':' + str(addr1[1]) + '] - ' + data.strip()
+x = random.randint(1,100)
+print x
+droprate = raw_input('Enter a percentage for the drop rate : ')
 
 
-    def handle(self):
-        self.serveraddress = ("localhost", 8989)
-        data = self.request[0].strip()
-        socket = self.request[1]
-        print "{} wrote:".format(self.client_address[0])
-        print data
-        print self.client_address[1]
-        socket.sendto(data, self.serveraddress)
-        smth = self.request[0].strip()
-        socket2 = self.request[1]
-        print "{} wrote:".format(self.serveraddress[0])
-        print data
-        print self.serveraddress[1]
-        socket.sendto(data, (self.client_address))
 
-    def reply(self):
-        self.client_address = ("localhost", 9999)
-        server2 = SocketServer.UDPServer("localhost", 8989)
-        data2 = self.request[0].strip()
-        socket = self.request[1]
-        print "{} wrote: ".format(server2[0])
-        print data
-        socket.sendto(data, self.serveraddress)
-        server.close()
-        sys.exit()
-
-if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999
-    server = SocketServer.UDPServer((HOST, PORT), MyUDPHandler)
-    server.serve_forever()
+if x < int (droprate):
+	s.sendto(reply , ("localhost", 8888))
+	# receive data from client (data, addr)
+	d = s.recvfrom(1024)
+	data = d[0]
+	addr = d[1]
+	     
+	reply = 'Server got ' + data
+	print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip()
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	print 'sending back to client'
+	s.sendto(reply , ("localhost", addr1[1]))
+	print addr1[1]
+	s.close()
+else:
+	s.sendto('packets dropped' , ("localhost", addr1[1]))
+	s.close()
+	
