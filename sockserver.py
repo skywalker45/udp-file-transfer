@@ -2,6 +2,7 @@
 import socket
 import sys
 import os
+import ast
  
 HOST = ''   # Symbolic name meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
@@ -41,6 +42,6 @@ while 1:
 
     s.sendto(data, addr)
      
-    print 'Message[' + addr[0] + ':' + str(addr[1]) + '] - ' + data.strip()
+    print data.strip()
      
 s.close()

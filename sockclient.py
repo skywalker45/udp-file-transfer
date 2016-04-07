@@ -15,12 +15,15 @@ port = 8888;
 
 filename = ""
 
+packetNum = -1
 packets = []
-tracking = []   # this variable will hold a buffer of all the packets and the time that it has been since they left
-                # when that time expires it will be sent again
+tracking = []   # this variable will keep track of the time that
+                # has passed since each packet left. When that time
+                # expires it will be sent again.
 
 def main():
 
+    global filename
     filename = raw_input('Enter name of File: ')
 
     #http://stackoverflow.com/questions/25465792/python-binary-eof
@@ -32,18 +35,36 @@ def main():
 
             package(data)
         print "[BREAK]"
-        listen = False
-        print "listen == False"
+        sendPackets()
+        startTracking()
 
 def package(d):
     print "packaging data:\n\"\n" + d + "\n\""
-    packets.append((filename, d))
+
+    global packetNum
+    packetNum += 1
+
+    packets.append((packetNum,filename, d))
     index = len(packets)
     trackit(index)
 
 def trackit(num):
     print "tracking packet " + str(num)
+    tracking.append(256)
 
+def sendPackets():
+    for packet in packets:
+        packet = packet + (len(packets),)
+        s.sendto(str(packet), (host, port))
+
+def startTracking():
+    #decrement each array by one and resend the corresponding packet when the count reaches 0
+    print "startTracking"
+    # while 1:
+    #     tracking[:] = [x - 1 for x in tracking]
+    #     print "decrementing: " + str(tracking[0])
+    #     if tracking[0] <= 0:
+    #         break
 
 class listen(threading.Thread):
     
@@ -77,4 +98,6 @@ if __name__ == '__main__':
     listener.start()
     print "running main..."
     main()
+    print packets
+    print tracking
     listener.kill()
