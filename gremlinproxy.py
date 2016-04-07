@@ -10,13 +10,13 @@ class MyUDPHandler(SocketServer.BaseRequestHandler):
         print "{} wrote:".format(self.client_address[0])
         print data
         print self.client_address[1]
-        socket.sendto(data.upper(), self.serveraddress)
+        socket.sendto(data, self.serveraddress)
         smth = self.request[0].strip()
         socket2 = self.request[1]
         print "{} wrote:".format(self.serveraddress[0])
         print data
         print self.serveraddress[1]
-        socket.sendto(data.upper(), (self.client_address))
+        socket.sendto(data, (self.client_address))
 
     def reply(self):
         self.client_address = ("localhost", 9999)
@@ -25,7 +25,7 @@ class MyUDPHandler(SocketServer.BaseRequestHandler):
         socket = self.request[1]
         print "{} wrote: ".format(server2[0])
         print data
-        socket.sendto(data.upper(), self.serveraddress)
+        socket.sendto(data, self.serveraddress)
         server.close()
         sys.exit()
 

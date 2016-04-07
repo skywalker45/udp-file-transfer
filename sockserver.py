@@ -5,7 +5,7 @@ import os
 import ast
  
 HOST = ''   # Symbolic name meaning all available interfaces
-PORT = 8888 # Arbitrary non-privileged port
+PORT = 8989 # Arbitrary non-privileged port
  
 # Datagram (udp) socket
 try :
