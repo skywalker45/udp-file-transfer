@@ -13,7 +13,7 @@ except socket.error:
 	sys.exit()
 
 host = raw_input('Enter an IP to connect to : ')
-port = 8888;
+port = 9999;
 
 filename = ""
 
@@ -82,11 +82,25 @@ class listen(threading.Thread):
 		self.running = 1
 
 	def run(self):
+		# create dgram udp socket
+		try:
+			leftsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		except socket.error:
+			print 'Failed to create socket'
+			sys.exit()
+
+		# Bind socket to local host and port
+		try:
+			leftsock.bind(('localhost', 1776))
+		except socket.error , msg:
+			print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+			sys.exit()
+
 		while self.running:
 			global tracking
-			ready = select.select([s], [], [], 1)
+			ready = select.select([leftsock], [], [], 1)
 			if ready[0]:
-				d = s.recvfrom(1024)
+				d = leftsock.recvfrom(1024)
 				reply = d[0]
 				addr = d[1]
 

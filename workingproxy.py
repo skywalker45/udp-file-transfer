@@ -1,6 +1,7 @@
 import socket
 import sys
 import random
+import select
 
 HOST = "localhost"   # Symbolic name meaning all available interfaces
 SERVERPORT = 8888 # Arbitrary non-privileged port
@@ -23,26 +24,22 @@ except socket.error , msg:
     sys.exit()
      
 print 'Socket bind complete'
-droprate = raw_input('Enter a percentage for the drop rate : ') 
-#now keep talking with the client
-# receive data from client (data, addr)
+
 while True:
-	d = s.recvfrom(1024)
-	data = d[0]
-	addr1 = d[1]
-	 
-	 
-	reply = data
-	 
-
-	print 'Message[' + addr1[0] + ':' + str(addr1[1]) + '] - ' + data.strip()
-	x = random.randint(1,100)
-	print x
+	ready = select.select([s], [], [], 1)
+	if ready[0]:
+		d = s.recvfrom(1024)
+		reply = d[0]
+		addr = d[1]
 
 
-	if x < int (droprate):
-		s.sendto(reply , ("localhost", 8888))
-	else:
-		s.sendto('packets dropped' , ("localhost", addr1[1]))
+		print reply
+
+		if reply == "":
+			self.kill()
+
+		if not reply == "0":
+			s.sendto(reply, ("localhost", 8888))
+
 s.close()
 	

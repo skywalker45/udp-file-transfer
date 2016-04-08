@@ -1,12 +1,12 @@
-
 import socket
 import sys
 import os
 import ast
+import select
  
 HOST = ''   # Symbolic name meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
-client_address = 'localhost', 9999
+ 
 # Datagram (udp) socket
 try :
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -59,18 +59,22 @@ def storePacket(pkt):
 	writeFileFromPackets()
 
 while running:
+	ready = select.select([s], [], [], 1)
+	if ready[0]:
+		# receive data from client (data, addr)
+		d = s.recvfrom(1024)
+		data = d[0]
+		addr = d[1]
 
-	# receive data from client (data, addr)
-	d = s.recvfrom(1024)
-	data = d[0]
-	addr = d[1]
+		if not data:
+			break
 
-	if not data:
-		break
+		packet = ast.literal_eval(data)
 
-	packet = ast.literal_eval(data)
-	s.sendto(packet[0], (client_address))
-	storePacket(packet)
-	print packet
+		print packet
+
+		if not packet == 0:
+			s.sendto(str(packet[0]), ('localhost', 1776))
+			storePacket(packet)
 	 
 s.close()
