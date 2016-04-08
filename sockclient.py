@@ -13,7 +13,7 @@ except socket.error:
 	sys.exit()
 
 host = raw_input('Enter an IP to connect to : ')
-port = 9999;
+port = 8888;
 
 filename = ""
 
