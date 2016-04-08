@@ -6,7 +6,7 @@ import ast
  
 HOST = ''   # Symbolic name meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
- 
+client_address = 'localhost', 9999
 # Datagram (udp) socket
 try :
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -69,7 +69,7 @@ while running:
 		break
 
 	packet = ast.literal_eval(data)
-	s.sendto(str(packet[0]), addr)
+	s.sendto(packet[0], (client_address))
 	storePacket(packet)
 	print packet
 	 
